@@ -1,0 +1,242 @@
+# Configuration Templates — Enterprise LAN Lab
+
+---
+
+## VLANs
+```
+vlan 10
+name SERVER
+vlan 20
+name TI
+vlan 30
+name RH
+vlan 40
+name VENTAS
+vlan 50
+name WIFI
+vlan 99
+name MGMT
+vlan 100
+name VOZ
+end
+```
+
+---
+
+## Basic Switch Configuration
+```
+enable
+conf t
+hostname SW
+no ip domain-lookup
+enable secret cisco
+username admin secret cisco
+line console 0
+logging synchronous
+login local
+exit
+line vty 0 15
+login local
+transport input ssh
+exit
+service password-encryption
+banner motd $Authorized access only$
+end
+```
+
+### SSH V2
+```
+ip domain-name empresa.local
+crypto key generate rsa
+ip ssh version 2
+```
+
+### MGMT SVI
+```
+interface vlan 99
+ip address X.X.X.X 255.255.255.248
+no shutdown
+```
+
+---
+
+## Trunk Configuration
+
+### Core Switch — Root Bridge
+```
+spanning-tree mode rapid-pvst
+spanning-tree vlan 1,10,20,30,40,50,99,100 root primary
+
+interface range gi1/0/1 - 4
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+```
+
+### Secondary Switch
+```
+spanning-tree mode rapid-pvst
+spanning-tree vlan 1,10,20,30,40,50,99,100 root secondary
+
+interface range gi0/1 - 2
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+
+interface range fa0/5 - 6
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+```
+
+### Default Switch
+```
+spanning-tree mode rapid-pvst
+
+interface range gi0/1 - 2
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+
+interface range fa0/5 - 6
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+```
+
+---
+
+## EtherChannel — LACP
+
+### Configure Port-Channel first
+```
+interface port-channel 1
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+```
+
+### Then physical interfaces
+```
+interface range gi0/1 - 2
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30,40,50,99,100
+switchport nonegotiate
+channel-group 1 mode active
+```
+
+---
+
+## SVIs and Inter-VLAN Routing
+```
+ip routing
+
+interface vlan 10
+ip address 10.0.0.57 255.255.255.252
+no shutdown
+interface vlan 20
+ip address 10.0.0.41 255.255.255.248
+no shutdown
+interface vlan 30
+ip address 10.0.0.49 255.255.255.248
+no shutdown
+interface vlan 40
+ip address 10.0.0.17 255.255.255.248
+no shutdown
+interface vlan 50
+ip address 10.0.0.33 255.255.255.248
+no shutdown
+interface vlan 99
+ip address 10.0.0.25 255.255.255.248
+no shutdown
+interface vlan 100
+ip address 10.0.0.1 255.255.255.240
+no shutdown
+```
+
+---
+
+## DHCP Server — Static IP
+```
+IP Address:   10.0.0.58
+Subnet Mask:  255.255.255.252
+Gateway:      10.0.0.57
+DNS:          8.8.8.8
+```
+
+### IP Helper-Address on Core Switch
+```
+interface vlan 20
+ip helper-address 10.0.0.58
+interface vlan 30
+ip helper-address 10.0.0.58
+interface vlan 40
+ip helper-address 10.0.0.58
+interface vlan 50
+ip helper-address 10.0.0.58
+interface vlan 100
+ip helper-address 10.0.0.58
+```
+
+---
+
+## Access Ports
+
+### Port with IP Phone + PC
+```
+interface range fa0/X - X
+switchport mode access
+switchport access vlan X
+switchport voice vlan 100
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 3
+switchport port-security violation restrict
+switchport port-security mac-address sticky
+no shutdown
+```
+
+### Port with PC only
+```
+interface range fa0/X - X
+switchport mode access
+switchport access vlan X
+spanning-tree portfast
+spanning-tree bpduguard enable
+switchport port-security
+switchport port-security maximum 1
+switchport port-security violation restrict
+switchport port-security mac-address sticky
+no shutdown
+```
+
+### AP Port
+```
+interface fa0/X
+switchport mode access
+switchport access vlan 50
+spanning-tree portfast
+spanning-tree bpduguard enable
+no shutdown
+```
+
+---
+
+## Verification Commands
+```
+show vlan brief
+show interfaces trunk
+show spanning-tree
+show spanning-tree summary
+show etherchannel summary
+show ip interface brief
+show ip interface brief | include up
+show port-security
+show port-security interface fa0/X
+show port-security address
+show ip dhcp binding
+show ip ssh
+show running-config
+show running-config | include helper
+```
