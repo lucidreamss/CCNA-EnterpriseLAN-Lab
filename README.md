@@ -6,7 +6,7 @@ Simulated enterprise network built in Cisco Packet Tracer featuring multi-VLAN s
 
 ## Topology
 
-![Topology](images/topology.png)
+![Topology](Images/Topology.png)
 
 ---
 
@@ -42,8 +42,8 @@ Simulated enterprise network built in Cisco Packet Tracer featuring multi-VLAN s
 
 ## Verification
 
-![EtherChannel](images/etherchannel.png)
-![Ping Inter-VLAN](images/ping-intervlan.png)
+![Interfaces](Images/InterfacesSW1.png)
+![Ping Inter-VLAN](Images/pingVLANS.png)
 
 ---
 
