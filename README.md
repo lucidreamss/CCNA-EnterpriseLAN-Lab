@@ -40,9 +40,14 @@ Simulated enterprise network built in Cisco Packet Tracer featuring multi-VLAN s
 
 ---
 
-## Verification
+### Show IP Interface Brief
 
 ![Interfaces](Images/InterfacesSW1.png)
+
+---
+
+### Inter-VLAN Ping Test
+
 ![Ping Inter-VLAN](Images/pingVLANS.png)
 
 ---
